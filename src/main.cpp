@@ -1,26 +1,42 @@
 #include <Arduino.h>
 
-int buttonState = 0;
 const int buttonPin = 2;
-const int ledPin1 = 4;
-const int ledPin2 = 5;
-const int ledPin3 = 6;
-const int ledPin4 = 7;
-const int ledPin5 = 8;
-const int ledPin6 = 9;
 
+// LED pins stored in an array (professional style)
+const int leds[] = {4, 8, 5};
+const int numLeds = 3;
+
+int currentLed = 0;
+bool lastButtonState = HIGH;
 
 void setup() {
-pinMode(ledPin1, OUTPUT);
-pinMode(ledPin2, OUTPUT);
-pinMode(ledPin3, OUTPUT);
-pinMode(ledPin4, OUTPUT);
-pinMode(ledPin5, OUTPUT);
-pinMode(ledPin6, OUTPUT);
-pinMode(buttonPin, INPUT);
+  for (int i = 0; i < numLeds; i++) {
+    pinMode(leds[i], OUTPUT);
+    digitalWrite(leds[i], LOW);
+  }
+
+  pinMode(buttonPin, INPUT_PULLUP);
 }
 
 void loop() {
-  buttonState = digitalRead(buttonPin);
-}
+  bool buttonState = digitalRead(buttonPin);
 
+  // Detect button press (HIGH → LOW)
+  if (lastButtonState == HIGH && buttonState == LOW) {
+    currentLed++;
+
+    if (currentLed >= numLeds) {
+      currentLed = 0; // wrap around
+    }
+
+    // Turn all LEDs off
+    for (int i = 0; i < numLeds; i++) {
+      digitalWrite(leds[i], LOW);
+    }
+
+    // Turn current LED on
+    digitalWrite(leds[currentLed], HIGH);
+  }
+
+  lastButtonState = buttonState;
+}
